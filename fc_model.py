@@ -22,7 +22,7 @@ class NeuralNet(Model):
         super(NeuralNet, self).__init__()
         self.fc1 = layers.Dense(hidden_1, activation=tf.nn.relu)
         self.fc2 = layers.Dense(hidden_2, activation=tf.nn.relu)
-        self.out = layers.Dense(num_classes)
+        self.out = layers.Dense(no_classes)
     def call(self, x, is_training=False):
         x = self.fc1(x)
         x = self.fc2(x)
@@ -45,9 +45,9 @@ def cross_entropy_loss(x, y):
 #accuracy metric
 def accuracy(y_pred, y_true):
     right_pred = tf.equal(tf.argmax(y_pred, 1), tf.cast(y_true, tf.int64))
-    return tf. reduce_mean(tf.cast(correct_prediction, tf.float32), axis = -1)
+    return tf.reduce_mean(tf.cast(right_pred, tf.float32), axis=-1)
 #stochastic gradient descent optimizer
-gradient_optimizer = tf_optimizers.SGD(learning_rate)
+gradient_optimizer = tf.keras.optimizers.SGD(learning_rate)
 def run_optimization(x, y):
     #wrap computation inside a GradientTape for automatic differentiation
     with tf.GradientTape() as g:
@@ -60,18 +60,18 @@ def run_optimization(x, y):
     #compute gradients
     gradients = g.gradient(loss, trainable_variables)
     #update W and b following gradients
-    optimizer.apply_gradients(zip(gradients, trainable_variables))
+    gradient_optimizer.apply_gradients(zip(gradients, trainable_variables))
 #run training for the given number of steps
 for step, (batch_x, batch_y) in enumerate(train_data.take(training_steps), 1):
     #run optimization to update w and b values
     run_optimization(batch_x, batch_y)
     if step % display_step == 0:
-        pred = neural_net (batch_x, is_training = True)
-        loss = cross_entropy_loss(pred, batch_y)
-        acc = accuracy(pred, batch_y)
-        print('step: %i, loss: %f, accuracy: %f' % (step, loss, acc))
+        pred = neural_net(batch_x, is_training=True)
+        loss = cross_entropy_loss(prediction, batch_y)
+        acc = accuracy(prediction, batch_y)
+        print(f'step:{step}, loss: {loss}, accuracy: {acc}'
 #test model on validation set
-pred = neural_net(x_test, is_training = False)
+pred = neural_net(x_test, is_training=False)
 print('Test Accuracy: %f' % accuracy(pred, y_test))
 #visualize predictions
 import matplotlib.pyplot as plt
