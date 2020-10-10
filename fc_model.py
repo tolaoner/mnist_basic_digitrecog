@@ -5,7 +5,7 @@ from tensorflow.keras.datasets import mnist
 no_classes = 10
 no_features = 784
 learning_rate = 0.1
-training_steps = 2000
+training_steps = 5000
 batch_size = 256
 display_step = 100
 hidden_1 = 128
@@ -15,7 +15,10 @@ x_train, x_test = np.array(x_train, np.float32), np.array(x_test,np.float32)
 x_train, x_test = x_train.reshape([-1,no_features]), x_test.reshape([-1, no_features])
 x_train, x_test = x_train/255., x_test/255
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-train_data = train_data.repeat().shuffle(5000).batch(batch_size).prefetch(1)
+train_data = train_data.repeat().shuffle(5000).batch(batch_size)#.prefetch(1)
+'''for element in train_data.take(2).as_numpy_iterator():
+    print(element)
+    print(train_data.take(2))'''
 #create TF model
 class NeuralNet(Model):
     def __init__(self):
@@ -65,11 +68,11 @@ def run_optimization(x, y):
 for step, (batch_x, batch_y) in enumerate(train_data.take(training_steps), 1):
     #run optimization to update w and b values
     run_optimization(batch_x, batch_y)
+    pred = neural_net(batch_x, is_training=True)
     if step % display_step == 0:
-        pred = neural_net(batch_x, is_training=True)
-        loss = cross_entropy_loss(prediction, batch_y)
-        acc = accuracy(prediction, batch_y)
-        print(f'step:{step}, loss: {loss}, accuracy: {acc}'
+        loss = cross_entropy_loss(pred, batch_y)
+        acc = accuracy(pred, batch_y)
+        print(f'step:{step}, loss: {loss}, accuracy: {acc}')
 #test model on validation set
 pred = neural_net(x_test, is_training=False)
 print('Test Accuracy: %f' % accuracy(pred, y_test))
